@@ -2,7 +2,7 @@
 
 define('IN_MANAGER_MODE', true);
 define('MODX_API_MODE', true);
-include 'index.php';
+include '../index.php';
 
 $modx = EvolutionCMS();
 $version = $modx->getVersionData();
