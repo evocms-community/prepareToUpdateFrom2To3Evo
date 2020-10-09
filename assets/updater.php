@@ -303,6 +303,9 @@ if (!Schema::hasTable('role_permissions')) {
         if ($role['exec_module'] == 1) {
             \DB::table('role_permissions')->insert(['permission' => 'list_module', 'role_id' => $id]);
         }
+        if ($role['new_chunk'] == 1) {
+            \DB::table('role_permissions')->insert(['permission' => 'access_permissions', 'role_id' => $id]);
+        }
     }
 
 }
