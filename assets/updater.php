@@ -310,6 +310,54 @@ if (!Schema::hasTable('role_permissions')) {
 
 }
 
+$cnt = \DB::table('system_eventnames')->where('name', 'OnBeforeUserSave')->count();
+if ($cnt == 0) {
+    \DB::table('system_eventnames')->insert(array(
+        63 =>
+            array(
+                'name' => 'OnBeforeUserSave',
+                'service' => 1,
+                'groupname' => 'Users',
+            ),
+    ));
+}
+
+$cnt = \DB::table('system_eventnames')->where('name', 'OnUserSave')->count();
+if ($cnt == 0) {
+    \DB::table('system_eventnames')->insert(array(
+        63 =>
+            array(
+                'name' => 'OnUserSave',
+                'service' => 1,
+                'groupname' => 'Users',
+            ),
+    ));
+}
+
+$cnt = \DB::table('system_eventnames')->where('name', 'OnBeforeUserDelete')->count();
+if ($cnt == 0) {
+    \DB::table('system_eventnames')->insert(array(
+        63 =>
+            array(
+                'name' => 'OnBeforeUserDelete',
+                'service' => 1,
+                'groupname' => 'Users',
+            ),
+    ));
+}
+
+$cnt = \DB::table('system_eventnames')->where('name', 'OnUserDelete')->count();
+if ($cnt == 0) {
+    \DB::table('system_eventnames')->insert(array(
+        63 =>
+            array(
+                'name' => 'OnUserDelete',
+                'service' => 1,
+                'groupname' => 'Users',
+            ),
+    ));
+}
+
 
 echo "Site ready to update, please download latest version from github and unpack to server";
 unlink(__FILE__);
