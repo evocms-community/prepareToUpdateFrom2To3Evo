@@ -7,6 +7,7 @@ define('MODX_API_MODE', true);
 include '../index.php';
 
 $modx = EvolutionCMS();
+
 $version = $modx->getVersionData();
 if (version_compare($version['version'], '2.0.3', '<')) {
     echo 'Please update to version 2.0.3 before start this script';
@@ -71,9 +72,10 @@ foreach ($users as $user) {
     $id = $newUser->getKey();
     $userAttributes['internalKey'] = $id;
     \EvolutionCMS\Models\WebUserAttribute::query()->create($userAttributes);
+    $arraySetting = [];
     foreach ($userSettings as $setting) {
         $setting['user'] = $id;
-        \EvolutionCMS\Models\UserSetting::query()->create($setting);
+        $arraySetting[] = $setting;
     }
     foreach ($userMemberGroup as $group) {
         $group['member'] = $id;
@@ -82,8 +84,41 @@ foreach ($users as $user) {
     foreach ($user->memberGroups()->get() as $group) {
         $group->delete();
     }
-    \EvolutionCMS\Models\UserSetting::query()->where('user', $oldId)->delete();
+    //\EvolutionCMS\Models\WebUserSetting::query()->where('webuser', $oldId)->delete();
+    foreach ($arraySetting as $setting)
+        \DB::table('user_settings')->insert($setting);
 }
+
+$managerGroup = \EvolutionCMS\Models\MembergroupName::query()->pluck('id', 'name')->toArray();
+
+$userGroups = \EvolutionCMS\Models\WebgroupName::query()->pluck('name', 'id')->toArray();
+
+$oldNewGroup = [];
+foreach ($userGroups as $key => $group) {
+
+    if (isset($managerGroup[$group])) {
+        $oldNewGroup[$key] = $managerGroup[$group];
+    } else {
+        $oldNewGroup[$key] = \EvolutionCMS\Models\MembergroupName::query()->insertGetId(['name' => $group]);
+    }
+}
+$newAccess = [];
+$oldWebGroupAccess = \EvolutionCMS\Models\WebgroupAccess::query()->get()->toArray();
+foreach ($oldWebGroupAccess as $access) {
+    $newAccess[] = ['membergroup' => $oldNewGroup[$access['webgroup']], 'documentgroup' => $access['documentgroup']];
+}
+foreach ($newAccess as $access)
+    \EvolutionCMS\Models\MembergroupAccess::query()->create($access);
+
+$newWebGroupsUsers = [];
+$oldWebGroupsUsers = \EvolutionCMS\Models\WebGroup::query()->get()->toArray();
+foreach ($oldWebGroupsUsers as $user){
+    $newWebGroupsUsers[] = ['user_group' => $oldNewGroup[$user['webgroup']], 'member'=>$user['webuser']];
+}
+foreach ($newWebGroupsUsers as $user){
+    \EvolutionCMS\Models\MemberGroup::query()->create($user);
+}
+
 
 if (!Schema::hasTable('migrations_install')) {
 
